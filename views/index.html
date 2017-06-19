@@ -1,0 +1,74 @@
+<div class="container">
+    <!-- 菜单开始 -->
+    <div class="row">
+        <div class="col-md-3">
+            <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#upload_box">
+                <span class="glyphicon glyphicon-upload"></span> 上传文档
+            </button>
+            <button type="button" class="btn btn-sm btn-default" id="new_floder">
+                <span class="glyphicon glyphicon-folder-open"></span> 新建文件夹
+            </button>
+        </div>
+        <div class="col-md-6">
+            <div class="btn-group" style="display:none;" id="all_edit">
+                <button type="button" class="btn btn-sm btn-default all_move"><span class="glyphicon glyphicon-arrow-right"></span> 移动</button>
+                <button type="button" class="btn btn-sm btn-default all_delete"><span class="glyphicon glyphicon-trash"></span> 删除</button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <input type="text" class="form-control input-sm" placeholder="搜索文件..." id="file_keyword">
+                <span class="input-group-addon" id="basic-addon1"><span class="glyphicon glyphicon-search"></span></span>
+            </div>
+        </div>
+    </div>
+    <!-- 导航开始 -->
+    <div class="row" style="margin-top:8px;font-size:13px;">
+        <div class="col-md-6" id="file_menu"></div>
+        <div class="col-md-6"> <span class="pull-right" id="str_count">已全部加载，共24个</span></div>
+    </div>
+    <!-- 文件列表开始 1 -->
+    <table id="file_table_view" class="table" style="margin-top:8px;font-size:14px;">
+        <thead id="file_list_sort" style="font-size:12px;">
+            <tr>
+                <th style="width:20px;"><input type="checkbox" id="select_all"></th>
+                <th style="width:50%;"><a href="javascript:;" class="set_sort" data-val="1">文件名 <span class="glyphicon glyphicon-arrow-up"></a></th>
+                <th style="width:200px;"></th>
+                <th><a href="javascript:;" class="set_sort" data-val="2">大小 <span class="glyphicon"></a></th>
+                <th><a href="javascript:;" class="set_sort" data-val="4">修改日期 <span class="glyphicon"></span></a></th>
+            </tr>
+        </thead>
+        <tbody id="file_list"></tbody>
+    </table>
+</div>
+<!-- 上传任务 -->
+<div id="upload_box" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">上传任务</h4>
+			</div>
+			<div class="modal-body">
+				<table class="table table-condensed" id="upload_task"></table>
+			</div>
+			<div class="modal-footer">
+                <input id="file_input" type="file" style="position: absolute;filter: alpha(opacity=0);opacity:0;width:128px;height:36px;">
+				<button type="button" class="btn btn-info pull-left">
+                    <span class="glyphicon glyphicon-plus"></span> 添加上传文件
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> 关闭</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 上传任务 -->
+<script src="http://#socket_link#/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="js/public.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    initNav('#nav#');
+    new Storage('#socket_link#');
+});
+</script>

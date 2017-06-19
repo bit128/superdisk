@@ -1,0 +1,164 @@
+<style>
+    .panel-body .progress { margin: 0 0 5px;;}
+    .panel-body .label { display: block; padding: 5px 0 4px; border-radius: 10px;}
+    .panel-body input { margin-top: 3px; text-align: center; border-radius: 15px;}
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong style="font-size:16px;">帐号管理</strong>
+                    <button type="button" class="btn btn-xs btn-info pull-right" id="new_user">
+                        <span class="glyphicon glyphicon-plus"></span> 创建用户帐号
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <table class="table" style="margin-top:8px;font-size:12px;">
+                        <thead>
+                            <tr>
+                                <th>帐号</th>
+                                <th>权限</th>
+                                <th>登录时间</th>
+                                <th>有效时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user_list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong style="font-size:16px;">网盘配置</strong>
+                    <!--
+                    <button type="button" class="btn btn-xs btn-warning pull-right">
+                        <span class="glyphicon glyphicon-repeat"></span> 重启服务
+                    </button>-->
+                </div>
+                <div class="panel-body">
+                    <!--
+                    <div class="row">
+                        <div class="col-md-6">
+                            <span class="label label-default">存储使用率 》》》</span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-info progress-bar-striped" style="width: 40%">
+                                    40%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <span class="label label-default" id="mem_label">内存使用率 》》》</span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="progress">
+                                <div id="mem_pro" class="progress-bar progress-bar-info progress-bar-striped" style="width: 60%">
+                                    40%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <span class="label label-default">计算使用率 》》》</span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-info progress-bar-striped" style="width: 30%">
+                                    40%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    -->
+                    <div style="margin:5px 0 10px;">
+                        <span class="label label-success btn-block">网盘存储路径</span>
+                        <input type="text" class="form-control input-sm" id="root_path">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p>
+                                <span class="label label-warning btn-block">网盘服务IP地址</span>
+                                <input type="text" class="form-control input-sm" id="service_ip" disabled>
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p>
+                                <span class="label label-info btn-block">Web服务端口</span>
+                                <input type="text" class="form-control input-sm" id="web_port">
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p>
+                                <span class="label label-info btn-block">上传服务端口</span>
+                                <input type="text" class="form-control input-sm" id="upload_port">
+                            </p>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 用户详情 -->
+<div id="user_info" class="modal fade" tableindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">用户信息</h4>
+            </div>
+            <div class="modal-body">
+                <form id="user_form">
+                    <p>
+                        <label>帐号</label>
+                        <small class="text-danger" id="user_account_error" style="display:none;">
+                            * 帐号只能有字母、数字和下划线组成，长度为4-32个字符
+                        </small>
+                        <input type="text" class="form-control input-sm" id="user_account">
+                    </p>
+                    <p>
+                        <label>权限</label><br>
+                        <small>
+                            <label><input type="checkbox" name="user_role" value="1"> 用户管理</label>
+                            <label><input type="checkbox" name="user_role" value="2"> 上传文件</label>
+                            <label><input type="checkbox" name="user_role" value="4"> 删除文件</label>
+                        </small>
+                    </p>
+                    <p>
+                        <label>有效时间</label>
+                        <small class="text-danger" id="user_exp_error" style="display:none;">
+                            * 时间格式：yyyy-mm-dd，例如：2017-05-15
+                        </small>
+                        <input type="text" class="form-control input-sm" value="2018-12-25" id="user_exp">
+                    </p>
+                    <p>
+                        <label>密码 <small class="text-warning">不填写可以免密登录</small></label>
+                        <input type="text" class="form-control input-sm" value="" id="user_password">
+                    </p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> 关闭</button>
+                <button type="button" class="btn btn-info" id="form_save"><span class="glyphicon glyphicon-save"></span> 保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="js/public.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    initNav('#nav#');
+    new ConfigManager();
+    new UserManager();
+});
+</script>
