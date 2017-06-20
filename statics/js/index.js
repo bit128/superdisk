@@ -325,7 +325,7 @@ Storage.prototype = {
                         html += f.printItem(f, d);
                     });
                     $('#file_list').html(html);
-                    $('#str_count').html('<span class="label label-default">已全部加载，共 <strong>'+data.result.length+'</strong> 个</span>');
+                    $('#str_count').html('<span class="label label-default">已加载文件数量共 <strong>'+data.result.length+'</strong> 个</span>');
                 } else {
                     alert(data.error);
                 }
@@ -352,8 +352,8 @@ Storage.prototype = {
         }
         html += '<a href="javascript:;" title="重命名" class="file_item_edit file_rename"><span class="glyphicon glyphicon-repeat"></span></a> '
             + '<a href="javascript:;" title="删除" class="file_item_edit file_delete"><span class="glyphicon glyphicon-trash"></span></a></td>'
-            + '<td><small>' + Storage.prototype.printSize(d.type, d.size) + '</small></td>'
-            + '<td><small>' + dateFormat('y-m-d h:i', d.mtime * 1000) + '</small></td></tr>';
+            + '<td><small>' + d.size + '</small></td>'
+            + '<td><small>' + d.mtime + '</small></td></tr>';
         return html;
     },
     printMenu: function(f){
@@ -376,18 +376,6 @@ Storage.prototype = {
             --c;
         }
         $('#file_menu').html('<a href="javascript:;" class="label label-warning"><span class="glyphicon glyphicon-chevron-left"></span> 返回上一级</a> ' + html);
-    },
-    printSize: function(type, size){
-        if (type != 'folder') {
-            var unit = [' G',' M',' kb',' byte']
-            while (size > 1024) {
-                size /= 1024;
-                unit.pop();
-            }
-            return size.toFixed(2) + unit.pop();
-        } else {
-            return '-';
-        }
     }
 };
 /**

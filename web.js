@@ -34,7 +34,7 @@ app.set('view engine', 'html');
 //页面公共数据
 var page_data = {
     data: {
-        version: '1.2.0 alpha'
+        version: '1.2.0 beta'
     }
 };
 /* ------ 页面路由规则 ------ */

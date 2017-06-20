@@ -49,9 +49,9 @@ var storage = {
                 list.push({
                     "name": files[i],
                     "type": type,
-                    "size": size,
-                    "ctime": stat.ctime/1000,
-                    "mtime": stat.mtime/1000
+                    "size": storage.sizeFormat(type, size),
+                    "ctime": storage.dateFormat('y-m-d h:i', stat.ctime),
+                    "mtime": storage.dateFormat('y-m-d h:i', stat.mtime)
                 });
                 //排序
                 switch (parseInt(body.sort)) {
@@ -144,6 +144,45 @@ var storage = {
                 });
             }
         });
+    },
+    sizeFormat: function(type, size){
+        if (type != 'folder') {
+            var unit = [' G',' M',' kb',' byte']
+            while (size > 1024) {
+                size /= 1024;
+                unit.pop();
+            }
+            return size.toFixed(2) + unit.pop();
+        } else {
+            return '-';
+        }
+    },
+    dateFormat: function(format, time){
+        var date;
+        if (time != undefined)
+            date = new Date(time);
+        else
+            date = new Date();
+        var date_dict = {
+            'y': date.getFullYear(),
+            'm': date.getMonth() + 1,
+            'd': date.getDate(),
+            'h': date.getHours(),
+            'i': date.getMinutes(),
+            's': date.getSeconds()
+        }
+        if (format == undefined)
+            format = 'y-m-d h:i:s';
+        var date_str = '';
+        for(var i=0; i<format.length; i++) {
+            var s = format.charAt(i);
+            if (date_dict[s]) {
+                date_str += date_dict[s] < 10 ? '0'+date_dict[s] : date_dict[s];
+            } else {
+                date_str += s;
+            }  
+        }
+        return date_str;
     }
 };
 exports.storage = storage;
