@@ -10,7 +10,7 @@ var storage = {
             folder_name = '新建文件夹' + (++i);
         }
         fs.mkdir(path.join(real_path, folder_name), 0777, function(err){
-            var date = new Date() / 1000;
+            var date = storage.dateFormat('y-m-d h:i');
             if (err) {
                 callback(err, null);
             } else {

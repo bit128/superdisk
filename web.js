@@ -219,6 +219,7 @@ app.post('/config.action', function(req, res){
             switch (req.body.action) {
                 case 'info':
                     config.ip = JSON.stringify(os.networkInterfaces()).match(/192\.168\.\d+\.\d+/)[0];
+                    fs.writeFileSync('config/main.json', JSON.stringify(config));
                     res.json({code: 100, result: config, error: null});
                     break;
                 case 'setInfo':
