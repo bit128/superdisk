@@ -4,8 +4,8 @@ echo '启动文件上传服务...'
 nohup node upload.js > logs/upload.log &
 echo '启动完成.'
 
-sleep 2s
+#sleep 2s
 #mac
-open 'http://127.0.0.1:2008'
+#open 'http://127.0.0.1:2008'
 #linux
 #x-www-browser 'http://127.0.0.1:2008'
