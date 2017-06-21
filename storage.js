@@ -28,7 +28,7 @@ var storage = {
         var real_path = path.join(root_path, body.path);
         fs.readdir(real_path, function(err, files){
             var list = [];
-            var c = files.length;
+            var c = files.length != undefined ? files.length : 0;
             for (var i=0; i<c; i++) {
                 //关键字鉴别
                 if (body.keyword != '' && files[i].indexOf(body.keyword) == -1) {
