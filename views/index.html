@@ -1,24 +1,33 @@
 <div class="container">
     <!-- 菜单开始 -->
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-6">
             <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#upload_box">
                 <span class="glyphicon glyphicon-upload"></span> 上传文档
             </button>
             <button type="button" class="btn btn-sm btn-default" id="new_floder">
                 <span class="glyphicon glyphicon-folder-open"></span> 新建文件夹
             </button>
-        </div>
-        <div class="col-md-6">
             <div class="btn-group" style="display:none;" id="all_edit">
                 <button type="button" class="btn btn-sm btn-default all_move"><span class="glyphicon glyphicon-arrow-right"></span> 移动</button>
                 <button type="button" class="btn btn-sm btn-default all_delete"><span class="glyphicon glyphicon-trash"></span> 删除</button>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="input-group">
                 <input type="text" class="form-control input-sm" placeholder="搜索文件..." id="file_keyword">
                 <span class="input-group-addon" id="basic-addon1"><span class="glyphicon glyphicon-search"></span></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="text" class="form-control input-sm" id="root_path">
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-sm btn-info" id="set_root_path">
+                        <span class="glyphicon glyphicon-map-marker"></span>
+                        设置网盘路径
+                    </button>
+                </span>
             </div>
         </div>
     </div>

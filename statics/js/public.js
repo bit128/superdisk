@@ -39,9 +39,7 @@ var alert = function(message, style){
     }
     var left = ($(document).width() - toast.width()) / 2;
     toast.attr('style', "position:fixed;top:80px;left:"+left+'px');
-    $('body').one('click', function(){
-        toast.fadeOut(3000);
-    });
+    toast.fadeOut(5000);
 };
 /**
  * 格式化时间

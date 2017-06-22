@@ -2,8 +2,11 @@ var path = require('path')
     ,mime = require('mime')
     ,fs = require('fs');
 var storage = {
-    newFolder: function(file_path, root_path, callback){
-        var real_path = path.join(root_path, file_path);
+    getRootPath: function(){
+        return JSON.parse(fs.readFileSync('config/main.json')).root_path;
+    },
+    newFolder: function(file_path, callback){
+        var real_path = path.join(storage.getRootPath(), file_path);
         var folder_name = '新建文件夹';
         var i = 0;
         while (fs.existsSync(path.join(real_path, folder_name))) {
@@ -24,66 +27,71 @@ var storage = {
             }
         });
     },
-    dir: function(body, root_path, callback) {
-        var real_path = path.join(root_path, body.path);
+    dir: function(body, callback) {
+        var real_path = path.join(storage.getRootPath(), body.path);
         fs.readdir(real_path, function(err, files){
-            var list = [];
-            var c = files.length != undefined ? files.length : 0;
-            for (var i=0; i<c; i++) {
-                //关键字鉴别
-                if (body.keyword != '' && files[i].indexOf(body.keyword) == -1) {
-                    continue;
+            if (files != undefined) {
+                var list = [];
+                var c = files.length != undefined ? files.length : 0;
+                for (var i=0; i<c; i++) {
+                    //关键字鉴别
+                    if (body.keyword != '' && files[i].indexOf(body.keyword) == -1) {
+                        continue;
+                    }
+                    var file_path = path.join(real_path, files[i]);
+                    var stat = fs.statSync(file_path)
+                    var type = 'folder';
+                    var size = 0;
+                    if (stat.isFile()) {
+                        type = mime.lookup(file_path);
+                        size = stat.size;
+                    }
+                    //类型鉴别
+                    if (body.type == 'folder' && type != 'folder')
+                        continue;
+                    //返回数据
+                    list.push({
+                        "name": files[i],
+                        "type": type,
+                        "size": storage.sizeFormat(type, size),
+                        "ctime": storage.dateFormat('y-m-d h:i', stat.ctime),
+                        "mtime": storage.dateFormat('y-m-d h:i', stat.mtime)
+                    });
+                    //排序
+                    switch (parseInt(body.sort)) {
+                        case 1:
+                            list.sort().reverse();
+                            break;
+                        case 2:
+                            list.sort(function(a, b){
+                                return a.size - b.size;
+                            });
+                            break;
+                        case 3:
+                            list.sort(function(a, b){
+                                return b.size - a.size;
+                            });
+                            break;
+                        case 4:
+                            list.sort(function(a, b){
+                                return a.mtime - b.mtime;
+                            });
+                            break;
+                        case 5:
+                            list.sort(function(a, b){
+                                return b.mtime - a.mtime;
+                            });
+                            break;
+                    }
                 }
-                var file_path = path.join(real_path, files[i]);
-                var stat = fs.statSync(file_path)
-                var type = 'folder';
-                var size = 0;
-                if (stat.isFile()) {
-                    type = mime.lookup(file_path);
-                    size = stat.size;
-                }
-                //类型鉴别
-                if (body.type == 'folder' && type != 'folder')
-                    continue;
-                //返回数据
-                list.push({
-                    "name": files[i],
-                    "type": type,
-                    "size": storage.sizeFormat(type, size),
-                    "ctime": storage.dateFormat('y-m-d h:i', stat.ctime),
-                    "mtime": storage.dateFormat('y-m-d h:i', stat.mtime)
-                });
-                //排序
-                switch (parseInt(body.sort)) {
-                    case 1:
-                        list.sort().reverse();
-                        break;
-                    case 2:
-                        list.sort(function(a, b){
-                            return a.size - b.size;
-                        });
-                        break;
-                    case 3:
-                        list.sort(function(a, b){
-                            return b.size - a.size;
-                        });
-                        break;
-                    case 4:
-                        list.sort(function(a, b){
-                            return a.mtime - b.mtime;
-                        });
-                        break;
-                    case 5:
-                        list.sort(function(a, b){
-                            return b.mtime - a.mtime;
-                        });
-                        break;
-                }
+                callback(list);
+            } else {
+                callback(null, '网盘配置错误：路径不存在');
             }
-            callback(list);
         });
     },
-    rename: function(body, root_path, callback){
+    rename: function(body, callback){
+        var root_path = storage.getRootPath();
         fs.rename(path.join(root_path, body.file_name),
             path.join(root_path, body.new_name),
             function(err){
@@ -95,7 +103,8 @@ var storage = {
             }
         );
     },
-    move: function(body, root_path, callback){
+    move: function(body, callback){
+        var root_path = storage.getRootPath();
         old_file = path.join(root_path, body.path, body.file_name);
         new_file = path.join(root_path, body.new_path, body.file_name);
         var is = fs.createReadStream(old_file);
@@ -104,8 +113,8 @@ var storage = {
         fs.unlinkSync(old_file);
         callback('移动成功');
     },
-    remove: function(file_path, root_path, callback){
-        var real_path = path.join(root_path, file_path);
+    remove: function(file_path, callback){
+        var real_path = path.join(storage.getRootPath(), file_path);
         if (fs.existsSync(real_path)) {
             var stat = fs.statSync(real_path);
             if (stat.isDirectory()) {
@@ -129,8 +138,8 @@ var storage = {
             callback('文件不存在', null);
         }
     },
-    info: function(file_path, root_path, callback){
-        var real_path = path.join(root_path, file_path);
+    info: function(file_path, callback){
+        var real_path = path.join(storage.getRootPath(), file_path);
         fs.stat(real_path, function(err, stat){
             if (err) {
                 callback(err, null);

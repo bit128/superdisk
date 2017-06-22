@@ -5,11 +5,10 @@ var fs = require('fs')
     ,os = require('os')
     ,path = require('path')
     ,mime = require('mime')
-    ,config = JSON.parse(fs.readFileSync('config/main.json'))
     ,body_parse = require('body-parser')
     ,express = require('express');
 app = express();
-app.listen(config.web)
+app.listen(2008)
 //设置中间件
 app.use(express.static('statics'));
 app.use(body_parse.json());
@@ -44,8 +43,9 @@ app.get('/', function(req, res){
         res.redirect('/login.page');
         return;
     }
+    var ip = JSON.stringify(os.networkInterfaces()).match(/192\.168\.\d+\.\d+/)[0];
     page_data.data.nav = 0;
-    page_data.data.socket_link = config.ip+':'+config.upload;
+    page_data.data.socket_link = ip+':4008';
     res.render('index', page_data);
 });
 //配置页面
@@ -218,8 +218,6 @@ app.post('/config.action', function(req, res){
             var config = JSON.parse(data);
             switch (req.body.action) {
                 case 'info':
-                    config.ip = JSON.stringify(os.networkInterfaces()).match(/192\.168\.\d+\.\d+/)[0];
-                    fs.writeFileSync('config/main.json', JSON.stringify(config));
                     res.json({code: 100, result: config, error: null});
                     break;
                 case 'setInfo':
@@ -246,11 +244,10 @@ app.post('/config.action', function(req, res){
 app.post('/disk.action', function(req, res){
     var opt_user = JSON.parse(fs.readFileSync('config/user.json'))[req.body.account];
     if (opt_user && opt_user.token == req.body.token) {
-        var root_path = config.root_path;
         var storage = require('./storage').storage;
         switch (req.body.action) {
             case 'newFolder':
-                storage.newFolder(req.body.path, root_path, function(err, result){
+                storage.newFolder(req.body.path, function(err, result){
                     if (result) {
                         res.json({code: 100, result: result, error: null});
                     } else {
@@ -264,8 +261,11 @@ app.post('/disk.action', function(req, res){
                     type: req.body.type,
                     sort: req.body.sort,
                     keyword: req.body.keyword
-                }, root_path, function(result){
-                    res.json({code: 100, result: result, error: null});
+                }, function(result, err){
+                    if (result)
+                        res.json({code: 100, result: result, error: null});
+                    else
+                        res.json({code: 101, result: null, error: err});
                 });
                 break;
             case 'rename':
@@ -273,7 +273,7 @@ app.post('/disk.action', function(req, res){
                     storage.rename({
                         file_name: req.body.file_name,
                         new_name: req.body.new_name
-                    }, root_path, function(err, result){
+                    }, function(err, result){
                         if (result) {
                             res.json({code: 100, result: result, error: null});
                         } else {
@@ -290,7 +290,7 @@ app.post('/disk.action', function(req, res){
                         path: req.body.path,
                         new_path: req.body.new_path,
                         file_name: req.body.file_name
-                    }, root_path, function(){
+                    }, function(){
                         res.json({code: 100, result: 'ok', error: null});
                     });
                 } else {
@@ -299,7 +299,7 @@ app.post('/disk.action', function(req, res){
                 break;
             case 'remove':
                 if (opt_user.role & 4) {
-                    storage.remove(req.body.path, root_path, function(err, result){
+                    storage.remove(req.body.path, function(err, result){
                         if (result) {
                             res.json({code: 100, result: result, error: null});
                         } else {
@@ -319,6 +319,7 @@ app.post('/disk.action', function(req, res){
 app.get('/reader.action/*', function(req, res){
     var file_path = req.path.substring(14);
     if (file_path) {
+        var config = JSON.parse(fs.readFileSync('config/main.json'));
         var full_path = path.join(config.root_path, decodeURI(file_path));
         fs.readFile(full_path, function(err, data){
             if (err) {
@@ -337,6 +338,7 @@ app.get('/reader.action/*', function(req, res){
 app.get('/download.action/*', function(req, res){
     var file_path = req.path.substring(16);
     if (file_path) {
+        var config = JSON.parse(fs.readFileSync('config/main.json'));
         var full_path = path.join(config.root_path, decodeURI(file_path));
         fs.readFile(full_path, function(err, data){
             if (err) {

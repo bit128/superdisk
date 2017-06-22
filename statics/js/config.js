@@ -9,24 +9,6 @@ ConfigManager.prototype = {
         $('#root_path').on('blur', function(){
             f.setInfo('root_path', $(this).val());
         });
-        $('#web_port').on('blur', function(){
-            var port = $(this).val();
-            if (!/^\d{4}$/.test(port)) {
-                alert('端口号必须是4位整数');
-                $('#web_port').focus();
-                return;
-            }
-            f.setInfo('web', port);
-        });
-        $('#upload_port').on('blur', function(){
-            var port = $(this).val();
-            if (!/^\d{4}$/.test(port)) {
-                alert('端口号必须是4位整数');
-                $('#upload_port').focus();
-                return;
-            }
-            f.setInfo('upload', port);
-        });
     },
     setInfo(field, value) {
         $.post(
@@ -59,9 +41,6 @@ ConfigManager.prototype = {
             function(data) {
                 if (data.code == 100) {
                     $('#root_path').val(data.result.root_path);
-                    $('#service_ip').val(data.result.ip);
-                    $('#web_port').val(data.result.web);
-                    $('#upload_port').val(data.result.upload);
                 }
             },
             'json'

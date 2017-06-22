@@ -7,7 +7,6 @@
 var http = require('http')
     ,path = require('path')
     ,fs = require('fs')
-    ,config = JSON.parse(fs.readFileSync('config/main.json'))
     ,socketio = require('socket.io');
 //任务池
 var task_pool = {};
@@ -15,7 +14,7 @@ var task_pool = {};
 var server = http.createServer(function(req, res){
     res.writeHead(200, {'Content-type': 'text/html'});
     res.end('Web Service');
-}).listen(config.upload, function(){
+}).listen(4008, function(){
     console.log('----> Web File System on line.');
 });
 
@@ -34,6 +33,7 @@ socketio.listen(server).on('connection', function(socket){
         } else if (msg.toString().substring(0,1) == '{') {
             var data = JSON.parse(msg);
             if (data.code == 100) {
+                var config = JSON.parse(fs.readFileSync('config/main.json'));
                 //新任务
                 var real_path = path.join(config.root_path, data.path);
                 var file_name  =data.name;

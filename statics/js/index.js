@@ -14,6 +14,9 @@ var Storage = function(socket_link){
     this.menu_selector = new FileMenu(true);
     this.bindEvent();
     this.dir('');
+    this.rootPath(function(root_path){
+        $('#root_path').val(root_path);
+    });
 };
 Storage.prototype = {
     constructor: Storage,
@@ -195,6 +198,44 @@ Storage.prototype = {
                 f.dir();
             }
         });
+        //设置网盘根路径
+        $('#set_root_path').on('click', function(){
+            $.post(
+                '/config.action',
+                {
+                    account: getCookie('account'),
+                    token: getCookie('token'),
+                    action: 'setInfo',
+                    field: 'root_path',
+                    value: $('#root_path').val()
+                },
+                function(data) {
+                    if (data.code == 100) {
+                        alert('网盘路径设置成功', 'success');
+                        f.dir();
+                    } else {
+                        alert(data.error);
+                    }
+                },
+                'json'
+            );
+        });
+    },
+    rootPath: function(callback){
+        $.post(
+            '/config.action',
+            {
+                account: getCookie('account'),
+                token: getCookie('token'),
+                action: 'info'
+            },
+            function(data) {
+                if (data.code == 100) {
+                    callback(data.result.root_path);
+                }
+            },
+            'json'
+        );
     },
     getFullPath: function(f){
         return (f.menu_stack.join('/') + '/').substring(1);

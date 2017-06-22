@@ -5,7 +5,7 @@
 </style>
 <div class="container">
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <strong style="font-size:16px;">帐号管理</strong>
@@ -21,88 +21,11 @@
                                 <th>权限</th>
                                 <th>登录时间</th>
                                 <th>有效时间</th>
-                                <th>操作</th>
+                                <th style="width:180px;">操作</th>
                             </tr>
                         </thead>
                         <tbody id="user_list"></tbody>
                     </table>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <strong style="font-size:16px;">网盘配置</strong>
-                    <!--
-                    <button type="button" class="btn btn-xs btn-warning pull-right">
-                        <span class="glyphicon glyphicon-repeat"></span> 重启服务
-                    </button>-->
-                </div>
-                <div class="panel-body">
-                    <!--
-                    <div class="row">
-                        <div class="col-md-6">
-                            <span class="label label-default">存储使用率 》》》</span>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="progress">
-                                <div class="progress-bar progress-bar-info progress-bar-striped" style="width: 40%">
-                                    40%
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <span class="label label-default" id="mem_label">内存使用率 》》》</span>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="progress">
-                                <div id="mem_pro" class="progress-bar progress-bar-info progress-bar-striped" style="width: 60%">
-                                    40%
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <span class="label label-default">计算使用率 》》》</span>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="progress">
-                                <div class="progress-bar progress-bar-info progress-bar-striped" style="width: 30%">
-                                    40%
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    -->
-                    <div style="margin:5px 0 10px;">
-                        <span class="label label-success btn-block">网盘存储路径</span>
-                        <input type="text" class="form-control input-sm" id="root_path">
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4">
-                            <p>
-                                <span class="label label-warning btn-block">网盘服务IP地址</span>
-                                <input type="text" class="form-control input-sm" id="service_ip" disabled>
-                            </p>
-                        </div>
-                        <div class="col-md-4">
-                            <p>
-                                <span class="label label-info btn-block">Web服务端口</span>
-                                <input type="text" class="form-control input-sm" id="web_port">
-                            </p>
-                        </div>
-                        <div class="col-md-4">
-                            <p>
-                                <span class="label label-info btn-block">上传服务端口</span>
-                                <input type="text" class="form-control input-sm" id="upload_port">
-                            </p>
-                        </div>
-                    </div>
-                    
                 </div>
             </div>
         </div>
@@ -128,7 +51,7 @@
                     <p>
                         <label>权限</label><br>
                         <small>
-                            <label><input type="checkbox" name="user_role" value="1"> 用户管理</label>
+                            <label><input type="checkbox" name="user_role" value="1"> 网盘配置</label>
                             <label><input type="checkbox" name="user_role" value="2"> 上传文件</label>
                             <label><input type="checkbox" name="user_role" value="4"> 删除文件</label>
                         </small>
@@ -154,11 +77,200 @@
     </div>
 </div>
 <script type="text/javascript" src="js/public.js"></script>
-<script type="text/javascript" src="js/config.js"></script>
 <script type="text/javascript">
+var UserManager = function(){
+    this.keyword = '';
+    this.handle = $('#user_list');
+    this.role_list = [1,2,4];
+    this.role_label = ['网盘配置','上传文件','删除文件'];
+    this.getList();
+    this.bindEvent();
+};
+UserManager.prototype = {
+    constructor: UserManager,
+    bindEvent: function(){
+        var f = this;
+        //关键字筛选
+        $('#keyword').on('blur', function(){
+            f.keyword = $(this).val();
+            f.getList();
+        });
+        //保存用户数据
+        $('#form_save').on('click', function(){
+            var user_account = $('#user_account').val();
+            if (! /^[a-z0-9A-Z\_]{4,32}$/.test(user_account)) {
+                $('#user_account_error').show();
+                return;
+            } else {
+                $('#user_account_error').hide();
+            }
+            var user_role = 0;
+            $('#user_form input[name="user_role"]:checked').each(function(){
+                user_role += parseInt($(this).val());
+            });
+            var user_exp = $('#user_exp').val();
+            if (! /^\d{4}\-\d{2}\-\d{2}$/.test(user_exp)) {
+                $('#user_exp_error').show();
+                $('#user_exp').focus();
+                return;
+            } else {
+                $('#user_exp_error').hide();
+            }
+            //提交表单数据
+            $.post(
+                '/user.action',
+                {
+                    account: getCookie('account'),
+                    token: getCookie('token'),
+                    action: 'update',
+                    user_account: user_account,
+                    user_role: user_role,
+                    user_exp: user_exp,
+                    user_password: $('#user_password').val(),
+                },
+                function(data){
+                    if (data.code == 100) {
+                        location.reload();
+                    } else {
+                        $('#user_info').modal('hide');
+                        alert(data.error);
+                    }
+                },
+                'json'
+            );
+        });
+        //新建用户信息
+        $('#new_user').on('click', function(){
+            $('#user_form')[0].reset();
+            $('input[name="user_role"]').each(function(){
+                $(this).removeAttr('checked');
+            });
+            $('#user_info').modal('show');
+        });
+        //编辑用户数据
+        this.handle.on('click', '.user_edit', function(){
+            var user_account = $(this).parents('tr').find('td:eq(0)').text();
+            $.post(
+                '/user.action',
+                {
+                    account: getCookie('account'),
+                    token: getCookie('token'),
+                    action: 'get',
+                    user_account: user_account
+                },
+                function(data) {
+                    if (data.code == 100) {
+                        $('#user_form')[0].reset();
+                        $('#user_info').modal('show');
+                        $('#user_account').val(data.result.account);
+                        $('input[name="user_role"]').each(function(){
+                            if (data.result.role & parseInt($(this).val())) {
+                                $(this).attr('checked', 'checled');
+                            }
+                        });
+                        $('#user_exp').val(data.result.exp.substring(0,10));
+                    } else {
+                        alert(data.error);
+                    }
+                },
+                'json'
+            );
+        });
+        //设置帐号状态
+        this.handle.on('click', '.set_status', function(){
+            var user_account = $(this).parents('tr').find('td:eq(0)').text();
+            var user_status = $(this).attr('data-val');
+            $.post(
+                '/user.action',
+                {
+                    account: getCookie('account'),
+                    token: getCookie('token'),
+                    action: 'set_status',
+                    user_account: user_account,
+                    user_status: user_status
+                },
+                function(data){
+                    if (data.code == 100)
+                        location.reload();
+                    else
+                        alert(data.error);
+                },
+                'json'
+            );
+        });
+        //删除帐号
+        this.handle.on('click', '.user_delete', function(){
+            if (confirm('确定要删除该帐号吗？操作不可恢复')) {
+                var user_account = $(this).parents('tr').find('td:eq(0)').text();
+                $.post(
+                    '/user.action',
+                    {
+                        account: getCookie('account'),
+                        token: getCookie('token'),
+                        action: 'delete',
+                        user_account: user_account
+                    },
+                    function(data){
+                        if (data.code == 100)
+                            location.reload();
+                        else
+                            alert(data.error);
+                    },
+                    'json'
+                );
+            }
+        });
+    },
+    getList: function(){
+        var f = this;
+        $.post(
+            '/user.action',
+            {
+                account: getCookie('account'),
+                token: getCookie('token'),
+                action: 'getList'
+            },
+            function(data) {
+                if (data.code == 100) {
+                    var html = '';
+                    for (item in data.result) {
+                        var d = data.result[item];
+                        if (f.keyword != '' && d.account.indexOf(f.keyword) == -1)
+                            continue;
+                        html += '<tr><td>'+d.account+'</td>'
+                            + '<td>'+f.printRole(f, d.role)+'</td>'
+                            + '<td>'+dateFormat('m-d h:i', d.ltime)+'</td>'
+                            + '<td>'+dateFormat('y-m-d', d.exp)+'</td><td>';
+                        html += '<button type="button" class="btn btn-xs btn-info user_edit" title="编辑"><span class="glyphicon glyphicon-edit"></span> 编辑</button> ';
+                        if (d.stat)
+                            html += '<button type="button" class="btn btn-xs btn-warning set_status" data-val="0" title="冻结"><span class="glyphicon glyphicon-remove-circle"></span> 冻结</button>';
+                        else
+                            html += '<button type="button" class="btn btn-xs btn-success set_status" data-val="1" title="启用"><span class="glyphicon glyphicon-ok-circle"></span> 启用</button>';
+                        html += ' <button type="button" class="btn btn-xs btn-default user_delete" title="删除"><span class="glyphicon glyphicon-trash"></span> 删除</button></td></tr>';
+                    }
+                    f.handle.html(html);
+                } else {
+                    alert(data.error);
+                }
+            },
+            'json'
+        )
+    },
+    printRole: function(f, role){
+        var input = '';
+        for (var i=0; i<f.role_label.length; i++) {
+            if (role & f.role_list[i])
+                input += '<label><input type="checkbox" value="'
+                    +f.role_list[i]+'" checked> ' + f.role_label[i] + '</label> &nbsp;&nbsp;';
+            else
+                input += '<label><input type="checkbox" value="'
+                    +f.role_list[i]+'"> ' + f.role_label[i] + '</label> &nbsp;&nbsp;';
+        }
+        return input;
+    }
+};
 $(document).ready(function(){
     initNav('#nav#');
-    new ConfigManager();
     new UserManager();
 });
 </script>
