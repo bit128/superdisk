@@ -86,10 +86,12 @@ app.post('/login.action', function(req, res){
             if (user.stat) {
                 var exp = new Date(user.exp);
                 if (new Date().getTime() < exp.getTime()) {
-                    user.token = require('crypto')
-                        .createHash('md5')
-                        .update(account + Math.random())
-                        .digest('hex');
+                    if (user.token.length != 32) {
+                        user.token = require('crypto')
+                            .createHash('md5')
+                            .update(account + Math.random())
+                            .digest('hex');
+                    }
                     user.ltime = new Date();
                     user_list[req.body.account] = user;
                     fs.writeFile('config/user.json', JSON.stringify(user_list), function(err){
