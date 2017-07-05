@@ -5,8 +5,10 @@
  * @version 17.06.26
  */
 var fs = require('fs')
-    ,path = require('path');
-require('net').createServer(function(socket){
+    ,path = require('path')
+    ,server = require('net').createServer();
+server.listen(3008);
+server.on('connection', function(socket){
     console.log('----> client online.', new Date().toLocaleString());
     var target = '';
     socket.on('data', function(msg){
@@ -35,4 +37,4 @@ require('net').createServer(function(socket){
     socket.on('close', function(){
         console.log('----> client offline.', new Date().toLocaleString());
     });
-}).listen(3008);
+});
