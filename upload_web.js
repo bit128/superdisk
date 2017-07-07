@@ -17,9 +17,13 @@ var server = http.createServer(function(req, res){
 socketio.listen(server).on('connection', function(socket){
     console.log('----> client online.', new Date().toLocaleString());
     var target = '';
+    var fd = null;
     socket.on('message', function(msg){
         if (target) {
-            fs.appendFileSync(target, msg);
+            if (fd == null)
+                fd = fs.openSync(target, 'a+');
+            fs.writeSync(fd, msg, 0, msg.length);
+            //fs.appendFileSync(target, msg);
         } else if (msg.toString().substring(0,1) == '{') {
             var data = JSON.parse(msg);
             if (data.code == 100) {
@@ -40,6 +44,8 @@ socketio.listen(server).on('connection', function(socket){
         }
     });
     socket.on('disconnect', function(){
+        if (fd != null)
+            fs.closeSync(fd);
         console.log('----> client offline:',socket.id,' ', new Date().toLocaleString());
     });
 });

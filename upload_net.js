@@ -11,10 +11,13 @@ server.listen(3008);
 server.on('connection', function(socket){
     console.log('----> client online.', new Date().toLocaleString());
     var target = '';
+    var fd = null;
     socket.on('data', function(msg){
         if (target) {
-            console.log('---->',msg);
-            fs.appendFileSync(target, msg);
+            if (fd == null)
+                fd = fs.openSync(target, 'a+');
+            fs.writeSync(fd, msg, 0, msg.length);
+            //fs.appendFileSync(target, msg);
         } else if (msg.toString().substring(0,1) == '{') {
             var data = JSON.parse(msg);
             if (data.code == 100) {
@@ -35,6 +38,8 @@ server.on('connection', function(socket){
         }
     });
     socket.on('close', function(){
+        if (fd != null)
+            fs.closeSync(fd);
         console.log('----> client offline.', new Date().toLocaleString());
     });
 });
