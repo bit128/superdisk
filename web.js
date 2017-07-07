@@ -342,13 +342,7 @@ app.get('/download.action/*', function(req, res){
     if (file_path) {
         var config = JSON.parse(fs.readFileSync('config/main.json'));
         var full_path = path.join(config.root_path, decodeURI(file_path));
-        fs.readFile(full_path, function(err, data){
-            if (err) {
-                res.send(err.toString());
-            } else {
-                res.send(data);
-            }
-        });
+        res.download(full_path);
     } else {
         res.send('');
     }
