@@ -204,7 +204,16 @@ var storage = {
                 var paths = real_path.split('/');
                 var file_name = paths[paths.length-1];
                 var cache_name = thumb_path+width+'_'+height+'_'+file_name;
-                gm(real_path).resize(width, height)
+                if (fs.existsSync(cache_name)) {
+                    fs.readFile(cache_name, function(err, data){
+                        if (err) {
+                            callback(err.toString());
+                        } else {
+                            callback(null, data, mime.lookup(cache_name));
+                        }
+                    });
+                } else {
+                    gm(real_path).resize(width, height)
                     .autoOrient()
                     .write(cache_name, function(err){
                         if (err) {
@@ -219,12 +228,13 @@ var storage = {
                             });
                         }
                     });
+                }
             } else {
                 fs.readFile(real_path, function(err, data){
                     if (err) {
                         callback(err.toString());
                     } else {
-                        callback(null, data, mime.lookup(file_path));
+                        callback(null, data, mime.lookup(real_path));
                     }
                 });
             }
