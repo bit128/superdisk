@@ -50,6 +50,8 @@ var storage = {
                     //类型鉴别
                     if (body.type == 'folder' && type != 'folder')
                         continue;
+                    if (body.type == 'image' && ['image/jpeg','image/png','image/gif','image/bmp'].indexOf(type) == -1)
+                        continue;
                     //返回数据
                     list.push({
                         "name": files[i],
