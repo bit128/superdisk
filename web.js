@@ -6,7 +6,8 @@ var fs = require('fs')
     ,path = require('path')
     ,mime = require('mime')
     ,body_parse = require('body-parser')
-    ,express = require('express');
+    ,express = require('express')
+    ,storage = require('./storage').storage;
 app = express();
 app.listen(2008)
 //设置中间件
@@ -246,7 +247,6 @@ app.post('/config.action', function(req, res){
 app.post('/disk.action', function(req, res){
     var opt_user = JSON.parse(fs.readFileSync('config/user.json'))[req.body.account];
     if (opt_user && opt_user.token == req.body.token) {
-        var storage = require('./storage').storage;
         switch (req.body.action) {
             case 'newFolder':
                 storage.newFolder(req.body.path, function(err, result){
@@ -317,6 +317,17 @@ app.post('/disk.action', function(req, res){
         res.json({code: 106, result: null, error: '需要登录，或者您的登录状态已经过期'})
     }
 });
+//文件下载动作
+app.get('/download.action/*', function(req, res){
+    var file_path = req.path.substring(16);
+    if (file_path) {
+        var config = JSON.parse(fs.readFileSync('config/main.json'));
+        var full_path = path.join(config.root_path, decodeURI(file_path));
+        res.download(full_path);
+    } else {
+        res.send('');
+    }
+});
 //文件预览动作
 app.get('/reader.action/*', function(req, res){
     var file_path = req.path.substring(14);
@@ -336,14 +347,18 @@ app.get('/reader.action/*', function(req, res){
         res.send('');
     }
 });
-//文件下载动作
-app.get('/download.action/*', function(req, res){
-    var file_path = req.path.substring(16);
-    if (file_path) {
-        var config = JSON.parse(fs.readFileSync('config/main.json'));
-        var full_path = path.join(config.root_path, decodeURI(file_path));
-        res.download(full_path);
+//图片预览动作
+app.get('/image.action/*', function(req, res){
+    if (req.query.path != undefined) {
+        storage.image(req.query.path, req.query.w, req.query.h, function(err, data, mimes){
+            if (err) {
+                res.send(err);
+            } else {
+                res.set('Content-type', mimes);
+                res.send(data);
+            }
+        });
     } else {
-        res.send('');
+        res.send('params fault.');
     }
 });

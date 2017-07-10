@@ -1,6 +1,7 @@
 var path = require('path')
     ,mime = require('mime')
-    ,fs = require('fs');
+    ,fs = require('fs')
+    ,gm = require('gm');
 var storage = {
     getRootPath: function(){
         return JSON.parse(fs.readFileSync('config/main.json')).root_path;
@@ -192,6 +193,42 @@ var storage = {
             }  
         }
         return date_str;
+    },
+    image: function(file_path, width, height, callback){
+        var real_path = path.join(storage.getRootPath(), decodeURI(file_path));
+        if (fs.existsSync(real_path)) {
+            if (width != undefined || height != undefined) {
+                var thumb_path = JSON.parse(fs.readFileSync('config/main.json')).thumb_path;
+                var paths = real_path.split('/');
+                var file_name = paths[paths.length-1];
+                var cache_name = thumb_path+width+'_'+height+'_'+file_name;
+                gm(real_path).resize(width, height)
+                    .autoOrient()
+                    .write(cache_name, function(err){
+                        if (err) {
+                            callback(err);
+                        } else {
+                            fs.readFile(cache_name, function(err, data){
+                                if (err) {
+                                    callback(err.toString());
+                                } else {
+                                    callback(null, data, mime.lookup(cache_name));
+                                }
+                            });
+                        }
+                    });
+            } else {
+                fs.readFile(real_path, function(err, data){
+                    if (err) {
+                        callback(err.toString());
+                    } else {
+                        callback(null, data, mime.lookup(file_path));
+                    }
+                });
+            }
+        } else {
+            callback('文件不存在');
+        }
     }
 };
 exports.storage = storage;

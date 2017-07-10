@@ -1,4 +1,5 @@
 .DS_Store
 logs/
+thumbs/
 storages/
 node_modules/
