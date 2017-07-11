@@ -381,7 +381,7 @@ Storage.prototype = {
             html += '<input type="checkbox">';
         html += '</td><td style="position:relative;">'
         if (icon == 'ic_image.png')
-            html += '<img src="/image.action/?path='+f.getFullPath(f)+d.name+'&w=150" style="width:50px;margin-right:10px;">';
+            html += '<img src="/reader.action/'+f.getFullPath(f)+d.name+'" style="width:50px;margin-right:10px;">';
         else
             html += '<img src="images/' + icon + '" style="width:50px;margin-right:10px;">';
         if (d.type != 'folder') {
