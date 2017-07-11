@@ -1,0 +1,123 @@
+<style>
+    .thumbnail { margin-bottom: 5px;}
+    #photo_list {
+        overflow-y:auto;
+        height:200px;
+        }
+    #scrool_bar {
+        position: absolute;
+        top:0;
+        right:0;
+        width:30px;
+        height:100px;
+        background:#fff;
+    }
+    .photo_item { width: 100px;}
+    .photo_select { background: #fa6800; border: 1px solid #fa8000;}
+    #main_photo { text-align: center;}
+    #main_photo img{
+        max-width: 100%;
+        max-height: 460px;
+    }
+    #photo_prev {background:url('/images/prev_light.png') no-repeat;}
+    #photo_prev:hover {background:url('/images/prev.png') no-repeat;}
+    #photo_next {background:url('/images/next_light.png') no-repeat;}
+    #photo_next:hover {background:url('/images/next.png') no-repeat;}
+    .photo_change {
+        width: 100px;
+        height: 100px;
+        position:absolute;
+        top:100px;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col-md-2" style="position:relative;">
+            <div id="photo_list"></div>
+            <div id="scrool_bar"></div>
+        </div>
+        <div class="col-md-10" style="position:relative;">
+            <div id="photo_prev" class="photo_change" style="left:0;"></div>
+            <div id="photo_next" class="photo_change" style="right:0;"></div>
+            <div class="thumbnail" style="border:0;padding:0;" id="main_photo"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/js/public.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    initNav('#nav#');
+    var middle = $(document).height()-130;
+    $('#photo_list,#scrool_bar').height(middle);
+    loadList('#photo#');
+    function loadList(photo){
+        var paths = decodeURI(photo).split('/');
+        var path = '';
+        var select_name = paths[paths.length-1];
+        if (paths.length > 1) {
+            paths.splice(paths.length-1, 1);
+            path = paths.join('/');
+        }
+        $('#main_photo').html('<a href="/reader.action/'+photo+'" target="_blank"><img src="/reader.action/'+photo+'"></a>');
+        $.post(
+            '/disk.action',
+            {
+                account: getCookie('account'),
+                token: getCookie('token'),
+                action: 'dir',
+                path: path,
+                type: 'image',
+                sort: 0,
+                keyword: ''
+            },
+            function(data){
+                if (data.code == 100) {
+                    var html = '';
+                    if (path != '')
+                        path += '/';
+                    $.each(data.result, function(i, d){
+                        if (d.name == select_name) {
+                            html += '<div class="thumbnail photo_item photo_select">';
+                        } else {
+                            html += '<div class="thumbnail photo_item">';
+                        }
+                        html += '<img src="/reader.action/'+path+d.name+'"></div>';
+                    });
+                    $('#photo_list').html(html);
+                }
+            },
+            'json'
+        );
+    }
+    $('#photo_list').on('click', '.photo_item', function(){
+        $('#photo_list .photo_item').removeClass('photo_select');
+        $(this).addClass('photo_select');
+        var photo = $(this).find('img').attr('src');
+        $('#main_photo').html('<a href="'+photo+'" target="_blank"><img src="'+photo+'"></a>');
+    });
+    $('.photo_change').on('click', function(){
+        var op = $('.photo_change').index(this);
+        var items = $('#photo_list').find('.photo_item');
+        var cursor = items.index($('#photo_list').find('.photo_select'));
+        var photo = '';
+        if (op == 0) {
+            if (cursor > 0) {
+                $('#photo_list').find('.photo_item').removeClass('photo_select');
+                var c = $('#photo_list').find('.photo_item:eq('+(cursor-1)+')')
+                c.addClass('photo_select');
+                photo = c.find('img').attr('src');
+            }
+        } else if (op == 1) {
+            if (cursor < items.length-1) {
+                $('#photo_list').find('.photo_item').removeClass('photo_select');
+                var c = $('#photo_list').find('.photo_item:eq('+(cursor+1)+')')
+                c.addClass('photo_select');
+                photo = c.find('img').attr('src');
+            }
+        }
+        if (photo != '') {
+            $('#main_photo').html('<a href="'+photo+'" target="_blank"><img src="'+photo+'"></a>');
+        }
+    });
+});
+</script>

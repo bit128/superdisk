@@ -385,8 +385,12 @@ Storage.prototype = {
         else
             html += '<img src="images/' + icon + '" style="width:50px;margin-right:10px;">';
         if (d.type != 'folder') {
-            html += '<a href="/reader.action/' + f.getFullPath(f) + d.name + '" target="_blank">' + d.name + '</a></td><td>'
-                + '<a href="/download.action/' + f.getFullPath(f) + d.name + '" target="_blank" title="下载" class="file_item_edit"><span class="glyphicon glyphicon-download"></span></a> '
+            if (d.type.substring(0, 5) == 'image') {
+                html += '<a href="/album.page/' + f.getFullPath(f) + d.name + '" target="_blank">' + d.name + '</a></td><td>'
+            } else {
+                html += '<a href="/reader.action/' + f.getFullPath(f) + d.name + '" target="_blank">' + d.name + '</a></td><td>'
+            }
+            html += '<a href="/download.action/' + f.getFullPath(f) + d.name + '" target="_blank" title="下载" class="file_item_edit"><span class="glyphicon glyphicon-download"></span></a> '
                 + '<a href="javascript:;" title="移动" class="file_item_edit file_move"><span class="glyphicon glyphicon-arrow-right"></span></a> ';
         } else {
             html += '<a href="javascript:;" class="open_menu" data-val="'+d.name+'">' + d.name + '</a></td><td>';

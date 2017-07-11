@@ -49,6 +49,16 @@ app.get('/', function(req, res){
     page_data.data.socket_link = ip+':4008';
     res.render('index', page_data);
 });
+//相册页面
+app.get('/album.page/*', function(req, res){
+    if (! req.cookies.account) {
+        res.redirect('/login.page');
+        return;
+    }
+    page_data.data.nav = 0;
+    page_data.data.photo = req.path.substring(12);
+    res.render('album', page_data);
+});
 //配置页面
 app.get('/config.page', function(req, res){
     if (! req.cookies.account) {
@@ -57,15 +67,6 @@ app.get('/config.page', function(req, res){
     }
     page_data.data.nav = 1;
     res.render('config', page_data);
-});
-//用户管理页面
-app.get('/user.page', function(req, res){
-    if (! req.cookies.account) {
-        res.redirect('/login.page');
-        return;
-    }
-    page_data.data.nav = 2;
-    res.render('user', page_data);
 });
 //登录页面
 app.get('/login.page', function(req, res){
